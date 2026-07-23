@@ -25,14 +25,27 @@ const TOO_MANY = {
 };
 
 /**
- * express-rate-limit's default key generator handles IPv6 correctly
- * (it collapses a /56 so one subnet cannot spread attempts across
- * 2^72 addresses). We only wrap it to add logging.
+ * express-rate-limit's default key generator just returns req.ip, which
+ * relies on Express's trust-proxy machinery reading a real socket address.
+ * Netlify Functions have no real socket — the request arrives as an event
+ * object — so req.ip can come back undefined even with trust proxy set
+ * correctly, and the default key generator throws ERR_ERL_UNDEFINED_IP_ADDRESS.
+ *
+ * x-nf-client-connection-ip is Netlify's own header for the real visitor
+ * IP, set by their edge and not attacker-controllable. Falling back to the
+ * first x-forwarded-for entry covers any other reverse proxy in front of
+ * this app; req.ip is still tried first so nothing changes on hosts where
+ * it already works correctly.
  */
+function resolveKey(req) {
+  const forwardedFor = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  return req.ip || req.headers['x-nf-client-connection-ip'] || forwardedFor || 'unknown';
+}
+
 function onLimitReached(req, res, next, options) {
   logger.warn('rate limit hit', {
     path: req.path,
-    ip: fingerprint(req.ip),
+    ip: fingerprint(resolveKey(req)),
     limit: options.limit,
   });
   res.status(options.statusCode).json(TOO_MANY);
@@ -44,6 +57,7 @@ const joinLimiter = rateLimit({
   limit: config.rateLimit.max,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
+  keyGenerator: resolveKey,
   // Failed validation still counts. Otherwise an attacker gets free attempts
   // by sending garbage, which is exactly what an enumeration script does.
   skipFailedRequests: false,
@@ -57,6 +71,7 @@ const globalLimiter = rateLimit({
   limit: config.rateLimit.globalMax,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
+  keyGenerator: resolveKey,
   handler: onLimitReached,
 });
 
