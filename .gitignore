@@ -1,0 +1,13 @@
+node_modules/
+
+# Secrets — never commit real credentials
+.env
+.env.*
+!.env.example
+
+# Local waitlist fallback spool (plaintext personal data)
+data/
+
+# OS / editor cruft
+.DS_Store
+__MACOSX/
