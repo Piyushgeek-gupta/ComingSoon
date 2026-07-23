@@ -91,6 +91,15 @@ function translateGoogleError(err) {
     logger.error('Spreadsheet or tab not found. Check GOOGLE_SHEET_ID and GOOGLE_SHEET_NAME.', { status });
     return new HttpError(503, generic, { code: 'store_missing', cause: err });
   }
+  // Google returns 400 "Unable to parse range" when GOOGLE_SHEET_NAME doesn't
+  // match an existing tab — same root cause as the 404 above, different status.
+  if (status === 400 && /unable to parse range/i.test(err?.response?.data?.error?.message || err?.message || '')) {
+    logger.error(
+      `Tab "${config.google.sheetName}" not found in the spreadsheet. Check that GOOGLE_SHEET_NAME matches the tab name exactly (case-sensitive).`,
+      { status }
+    );
+    return new HttpError(503, generic, { code: 'store_bad_range', cause: err });
+  }
   if (status === 429 || status === 503) {
     return new HttpError(503, generic, { code: 'store_busy', cause: err });
   }
