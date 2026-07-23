@@ -485,6 +485,7 @@ a { text-decoration: none; color: inherit; }
 @media (max-width: 560px) {
   .site-header { padding-top: 24px; justify-content: center; text-align: center; }
   .logo { display: inline-block; }
+  .logo__text { align-items: center; }
 
   .hero__title { font-size: clamp(32px, 9vw, 44px); }
 
