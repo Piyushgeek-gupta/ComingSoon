@@ -111,6 +111,46 @@ function translateGoogleError(err) {
 }
 
 /* ---------------------------------------------------------
+   Sheet tab resolution
+   --------------------------------------------------------- */
+
+// GOOGLE_SHEET_NAME is a guess at the tab's title, and operators reliably get
+// it wrong (default "Waitlist" vs. whatever Google actually named the first
+// tab, e.g. "Sheet1"). Rather than hard-failing every write until someone
+// notices and fixes the env var, fall back to whatever tab actually exists.
+let resolvedSheetName = null;
+
+async function resolveSheetName() {
+  if (resolvedSheetName) return resolvedSheetName;
+
+  const sheets = await getSheets();
+  const meta = await sheets.spreadsheets.get(
+    { spreadsheetId: config.google.sheetId, fields: 'sheets.properties.title' },
+    requestOptions()
+  );
+
+  const titles = (meta.data.sheets ?? []).map((s) => s.properties.title);
+
+  if (titles.includes(config.google.sheetName)) {
+    resolvedSheetName = config.google.sheetName;
+    return resolvedSheetName;
+  }
+
+  if (titles.length === 0) {
+    throw new HttpError(503, 'We could not save your email right now. Please try again in a moment.', {
+      code: 'store_no_tabs',
+    });
+  }
+
+  logger.warn(
+    `GOOGLE_SHEET_NAME "${config.google.sheetName}" doesn't match any tab — using "${titles[0]}" instead. ` +
+      `Present tabs: ${titles.join(', ')}. Set GOOGLE_SHEET_NAME to silence this.`
+  );
+  resolvedSheetName = titles[0];
+  return resolvedSheetName;
+}
+
+/* ---------------------------------------------------------
    Header row
    --------------------------------------------------------- */
 
@@ -119,11 +159,12 @@ let headerChecked = false;
 async function ensureHeaderRow() {
   if (headerChecked) return;
 
+  const sheetName = await resolveSheetName();
   const sheets = await getSheets();
   const res = await sheets.spreadsheets.values.get(
     {
       spreadsheetId: config.google.sheetId,
-      range: `${config.google.sheetName}!A1:C1`,
+      range: `${sheetName}!A1:C1`,
     },
     requestOptions()
   );
@@ -133,7 +174,7 @@ async function ensureHeaderRow() {
     await sheets.spreadsheets.values.update(
       {
         spreadsheetId: config.google.sheetId,
-        range: `${config.google.sheetName}!A1:C1`,
+        range: `${sheetName}!A1:C1`,
         valueInputOption: 'RAW',
         requestBody: { values: [HEADER_ROW] },
       },
@@ -152,11 +193,12 @@ async function ensureHeaderRow() {
 let hashIndex = { set: null, fetchedAt: 0, inFlight: null };
 
 async function fetchHashIndex() {
+  const sheetName = await resolveSheetName();
   const sheets = await getSheets();
   const res = await sheets.spreadsheets.values.get(
     {
       spreadsheetId: config.google.sheetId,
-      range: `${config.google.sheetName}!B2:B`,
+      range: `${sheetName}!B2:B`,
     },
     requestOptions()
   );
@@ -312,11 +354,12 @@ async function addSubscriber(entry) {
       return { created: false, duplicate: true, store: 'sheets' };
     }
 
+    const sheetName = await resolveSheetName();
     const sheets = await getSheets();
     await sheets.spreadsheets.values.append(
       {
         spreadsheetId: config.google.sheetId,
-        range: `${config.google.sheetName}!${COLUMN_RANGE}`,
+        range: `${sheetName}!${COLUMN_RANGE}`,
         valueInputOption: 'RAW',
         insertDataOption: 'INSERT_ROWS',
         requestBody: { values: [row] },
