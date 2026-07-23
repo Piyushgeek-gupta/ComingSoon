@@ -16,6 +16,7 @@
   var message = document.getElementById("form-message");
   var trap    = document.getElementById("website"); // honeypot
   var counter = document.querySelector(".community__text");
+  var countEnabled = counter && counter.dataset.publicCountEnabled === "true";
 
   if (!form || !input || !button || !message) return;
 
@@ -147,10 +148,10 @@
 
   /* ---- Live early-bird count ----
      The endpoint is disabled by default (it would leak the size of the
-     list). When it is off this fails silently and the static copy in the
-     markup stays exactly as authored. */
+     list). When it is off we leave the static copy in the markup intact.
+  */
   function refreshCount() {
-    if (!counter) return;
+    if (!counter || !countEnabled) return;
 
     fetch(API_BASE + "/api/waitlist/count", { cache: "no-store" })
       .then(function (res) { return res.ok ? res.json() : null; })
