@@ -1,0 +1,112 @@
+/* =========================================================
+   NOOKAA — Legal pages (privacy policy)
+   legal.css  (loaded after style.css; reuses its design tokens)
+   ========================================================= */
+
+/* Long scrolling document: scroll the backdrop instead of pinning it. */
+.legal-page { background-attachment: scroll; }
+
+.legal {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 28px var(--gutter) 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.legal__card {
+  background: rgba(255, 252, 246, 0.9);
+  border: 1.5px solid #efe2cf;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: clamp(24px, 5vw, 56px);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.legal__title {
+  margin: 0 0 4px;
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--brown);
+}
+
+.legal__updated {
+  margin: 0 0 24px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--orange);
+}
+
+.legal__card p { margin: 0 0 14px; }
+
+.legal__card section {
+  margin-top: 34px;
+  scroll-margin-top: 24px;
+}
+
+.legal__card h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.25rem, 2.4vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--brown);
+}
+
+.legal__card ul,
+.legal__card ol {
+  margin: 0 0 14px;
+  padding-left: 1.4em;
+}
+.legal__card li { margin-bottom: 6px; padding-left: 4px; }
+.legal__card li::marker { color: var(--orange); font-weight: 700; }
+
+.legal__card strong { color: var(--brown); font-weight: 600; }
+
+.legal__card a {
+  color: var(--brown);
+  text-decoration: underline;
+  text-decoration-color: var(--orange);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+.legal__card a:hover { color: var(--brown-dark); text-decoration-color: var(--brown); }
+
+/* Table of contents */
+.legal__toc {
+  margin: 26px 0 0;
+  padding: 18px 22px;
+  background: var(--cream-2);
+  border-radius: 16px;
+}
+.legal__toc-title {
+  margin: 0 0 8px !important;
+  font-size: 1rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.legal__toc ol {
+  margin: 0;
+  columns: 2;
+  column-gap: 32px;
+  font-size: 16px;
+}
+.legal__toc li { margin-bottom: 4px; break-inside: avoid; }
+
+/* Footer links */
+.site-footer__links { display: flex; gap: 20px; }
+.site-footer__links a {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--brown);
+}
+.site-footer__links a:hover,
+.site-footer__links a[aria-current="page"] { color: var(--orange); }
+
+@media (max-width: 640px) {
+  .legal { padding-top: 16px; }
+  .legal__card { font-size: 16px; }
+  .legal__toc ol { columns: 1; }
+  .site-footer__links { justify-content: center; }
+}

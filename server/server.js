@@ -172,6 +172,7 @@ app.use('/api', (req, res) => {
 app.use(
   express.static(config.publicDir, {
     index: 'index.html',
+    extensions: ['html'], // /privacy-policy → privacy-policy.html (Netlify does this itself)
     dotfiles: 'deny', // never serve .env, .git, .DS_Store …
     redirect: false,
     maxAge: config.isProduction ? '7d' : 0,
