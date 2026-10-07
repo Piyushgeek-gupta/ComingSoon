@@ -327,7 +327,46 @@ a { text-decoration: none; color: inherit; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 16px 24px;
+  flex-wrap: wrap;
+}
+
+/* Legal links: soft pill buttons */
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.site-footer__links a {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  border: 1.5px solid rgba(112, 72, 37, 0.35);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 252, 246, 0.6);
+  color: var(--brown);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  transition: background-color 0.2s ease, color 0.2s ease,
+              border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.site-footer__links a:hover,
+.site-footer__links a:focus-visible {
+  background: var(--brown);
+  border-color: var(--brown);
+  color: #f7efe6;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 18px -12px rgba(112, 72, 37, 0.6);
+}
+.site-footer__links a[aria-current="page"] {
+  background: rgba(230, 171, 98, 0.25);
+  border-color: var(--orange);
+}
+.site-footer__links a[aria-current="page"]:hover {
+  background: var(--brown);
+  border-color: var(--brown);
 }
 .site-footer__copy {
   margin: 0;
@@ -507,6 +546,7 @@ a { text-decoration: none; color: inherit; }
     text-align: center;
     padding-bottom: 26px;
   }
+  .site-footer__links { justify-content: center; }
 
   .mascot { width: min(88%, 380px); }
 
